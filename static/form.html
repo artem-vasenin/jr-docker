@@ -1,10 +1,93 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/form.css">
     <title>Upload form</title>
 </head>
-<body>
+<body class="body">
+    <header class="header">
+        <h1 class="title">Upload Photos</h1>
+        <h2 class="subtitle">Upload selfies, memes, or any fun pictures here.</h2>
+        <div class="tabs">
+            <a href="/upload" class="tab active">Upload</a>
+            <a href="/images" class="tab">Images</a>
+        </div>
+    </header>
 
+    <main class="main">
+        <form id="uploadForm">
+            <div class="dropzone" id="dropzone">
+                <div class="dropzoneImg">
+                    <img src="img/group.svg" alt="img" class="img">
+                </div>
+                <div class="dropzoneTitle" id="dropzoneTitle">Select a file or drag and drop here</div>
+                <div class="dropzoneWarning">Only support .jpg, .png and gif.<br>Maximum file size is 5MB </div>
+            </div>
+            <input type="file" id="fileInput" hidden />
+            <div id="fileList"></div>
+        </form>
+
+        <button class="getLinkBtn">Browse your file</button>
+
+        <div class="linkBlock">
+            <div class="linkTitle">Current Upload</div>
+            <div class="linkField">
+                <input class="linkText" id="linkText" type="text" placeholder="http://">
+                <button class="copyLinkBtn" id="copyLinkBtn">Copy</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('fileInput');
+    const fileList = document.getElementById('fileList');
+    const dropzoneTitle = document.getElementById('dropzoneTitle');
+
+    // При клике на drop-зону открываем диалог выбора файла
+    dropzone.addEventListener('click', () => fileInput.click());
+
+    // При выборе файла вручную
+    fileInput.addEventListener('change', (e) => {
+      handleFiles(e.target.files);
+    });
+
+    // Drag-and-drop
+    dropzone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropzone.classList.add('dragover');
+    });
+
+    dropzone.addEventListener('dragleave', () => {
+      dropzone.classList.remove('dragover');
+    });
+
+    dropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropzone.classList.remove('dragover');
+      handleFiles(e.dataTransfer.files);
+    });
+
+    function handleFiles(files) {
+      fileList.innerHTML = '';
+      const file = files[0];
+      if (file) {
+          if (file.size < 5 * 1024 * 1024 && ['image/jpeg', 'image/png', 'image/gif'].includes(file.type)) {
+            const item = document.createElement('div');
+            item.textContent = `📄 ${file.name} (${Math.round(file.size / 1024)} KB)`;
+            fileList.appendChild(item);
+          } else {
+            dropzoneTitle.textContent = "Upload failed";
+            dropzoneTitle.style.color = 'red';
+            setTimeout(() => {
+                dropzoneTitle.textContent = "Select a file or drag and drop here";
+                dropzoneTitle.style.color = '#0B0B0B';
+            }, 3000);
+          }
+      }
+    }
+  </script>
 </body>
 </html>
