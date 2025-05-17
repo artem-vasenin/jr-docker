@@ -1,7 +1,10 @@
 const dropzone = document.getElementById('dropzone');
 const fileInput = document.getElementById('fileInput');
 const dropzoneTitle = document.getElementById('dropzoneTitle');
+const getLinkBtn = document.getElementById('getLinkBtn');
 const myAlert = document.getElementById('myAlert');
+const linkText = document.getElementById('linkText');
+const copyLinkBtn = document.getElementById('copyLinkBtn');
 
 // При клике на drop-зону открываем диалог выбора файла
 dropzone.addEventListener('click', () => fileInput.click());
@@ -27,6 +30,44 @@ dropzone.addEventListener('drop', (e) => {
   handleFiles(e.dataTransfer.files);
 });
 
+getLinkBtn.addEventListener('click', e => {
+    const path = e.target.dataset.path;
+    if (path) {
+        linkText.value = path;
+    }
+});
+
+copyLinkBtn.addEventListener('click', e => {
+    console.log(e);
+    const path = e.target.dataset.path;
+    if (path) {
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(path)
+            .then(() => {
+                onAlert('Path was copied');
+            })
+            .catch(err => {
+                onAlert('Copy is failed', 'error');
+            });
+        } else {
+            // fallback для старых браузеров или не-HTTPS
+            const textarea = document.createElement('textarea');
+            textarea.value = path;
+            textarea.style.position = 'fixed';
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
+            try {
+              document.execCommand('copy');
+              onAlert('Path was copied');
+            } catch (err) {
+              onAlert('Copy is failed', 'error');
+            }
+            document.body.removeChild(textarea);
+        }
+    }
+});
+
 const onAlert = (text, type='success', time=5000) => {
         myAlert.innerText = text;
         myAlert.classList.add('active', type);
@@ -48,6 +89,9 @@ const file = files[0];
 
             if (res.ok) {
                 onAlert("Upload success", "success", 3000);
+                const resJson = await res.json();
+                getLinkBtn.dataset.path = resJson.path;
+                copyLinkBtn.dataset.path = resJson.path;
             } else {
                 onAlert("Upload error", "error", 3000);
             }
