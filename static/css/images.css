@@ -1,0 +1,107 @@
+@import "base.css";
+
+.body {
+    background: var(--color-light-secondary);
+    color: var(--color-dark-primary);
+    justify-content: initial;
+}
+.title {
+    font-weight: 700;
+    font-size: 16px;
+    text-align: center;
+    margin: 0 0 10px;
+    padding-top: 30px;
+}
+.subtitle {
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 150%;
+    text-align: center;
+    margin: 0;
+    padding-bottom: 50px;
+}
+.tabs {
+    text-align: center;
+    padding-bottom: 50px;
+}
+.tab {
+    display: inline-block;
+    padding: 0 9px;
+    font-weight: 700;
+    font-size: 20px;
+    line-height: 100%;
+    text-decoration: none;
+    color: var(--color-blue-secondary);
+
+    &.active, &:hover {
+        color: var(--color-blue-primary);
+    }
+}
+
+.table {
+    width: 800px;
+}
+.th, .td {
+    text-align: left;
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 100%;
+    padding: 6px;
+}
+.td.name {
+    display: flex;
+    gap: 16px;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 100%;
+}
+.td.url a {
+    font-weight: 300;
+    font-size: 16px;
+    line-height: 100%;
+    text-decoration: none;
+    color: var(--color-dark-primary);
+    &:hover {
+        text-decoration: underline;
+    }
+}
+.td.delete .deleteBtn {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--color-red-secondary);
+    border-color: transparent;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    &:hover {
+       border-color: var(--color-red-primary);
+    }
+}
+
+.alert {
+    position: fixed;
+    width: 320px;
+    height: 50px;
+    background: var(--color-blue-secondary);
+    border-radius: 0 0 10px 10px;
+    top: 0;
+    left: calc(50% - 160px);
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 20px;
+    color: var(--color-blue-primary);
+    box-shadow: 0 0 4px rgba(0, 0, 0, .2);
+    display: none;
+    justify-content: center;
+    align-items: center;
+
+    &.error {
+        background: var(--color-red-secondary);
+        color: var(--color-red-primary);
+    }
+
+    &.active {
+        display: flex;
+    }
+}

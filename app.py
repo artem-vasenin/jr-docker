@@ -11,12 +11,12 @@ ALLOWED_EXT = {'jpg', 'jpeg', 'png', 'gif'}
 MAX_FILE_SIZE = 5 * 1024 * 1024
 
 os.makedirs(UPLOAD_DIR, exist_ok=True)
-files = {'/': './static/index.html', '/upload': './static/form.html'}
+files = {'/': './static/index.html', '/upload': './static/form.html', '/images': './static/images.html'}
 
 class API(SimpleHTTPRequestHandler):
     def do_GET(self):
         print(self.path)
-        if self.path in ['/', '/upload']:
+        if self.path in ['/', '/upload', '/images']:
             self.send_response(200)
             self.send_header('Content-type', 'text/html')
             self.end_headers()
@@ -40,6 +40,9 @@ class API(SimpleHTTPRequestHandler):
     def do_POST(self):
         if self.path == '/upload':
             print('POST upload')
+    def do_DELETE(self):
+        if self.path == '/images':
+            print('Delete')
 
 if __name__ == '__main__':
     server_address = (HOST, PORT)
