@@ -155,30 +155,3 @@
     color: var(--color-gray-primary);
     flex: 1;
 }
-
-.alert {
-    position: fixed;
-    width: 320px;
-    height: 50px;
-    background: var(--color-blue-secondary);
-    border-radius: 0 0 10px 10px;
-    top: 0;
-    left: calc(50% - 160px);
-    font-weight: 600;
-    font-size: 14px;
-    line-height: 20px;
-    color: var(--color-blue-primary);
-    box-shadow: 0 0 4px rgba(0, 0, 0, .2);
-    display: none;
-    justify-content: center;
-    align-items: center;
-
-    &.error {
-        background: var(--color-red-secondary);
-        color: var(--color-red-primary);
-    }
-
-    &.active {
-        display: flex;
-    }
-}
