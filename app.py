@@ -10,7 +10,7 @@ HOST = '0.0.0.0'
 PORT = 8000
 UPLOAD_DIR = 'images'
 ALLOWED_EXT = {'jpg', 'jpeg', 'png', 'gif'}
-MAX_FILE_SIZE = 1 * 1024 * 1024
+MAX_FILE_SIZE = 5 * 1024 * 1024
 
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 pages = {'/': './static/index.html', '/upload': './static/form.html', '/images': './static/images.html'}
