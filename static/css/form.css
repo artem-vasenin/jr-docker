@@ -91,10 +91,14 @@
     align-items: center;
     transition: all .3s;
     margin-bottom: 50px;
-    &:hover {
+    &:not(:disabled):hover {
         background: var(--color-blue-secondary);
         color: var(--color-blue-primary);
         transition: all .3s;
+    }
+    &:disabled {
+        background: var(--color-gray-primary);
+        cursor: not-allowed;
     }
 }
 
@@ -132,10 +136,14 @@
     background: var(--color-blue-primary);
     color: var(--color-light-primary);
     transition: all .3s;
-    &:hover {
+    &:not(:disabled):hover {
         background: var(--color-blue-secondary);
         color: var(--color-blue-primary);
         transition: all .3s;
+    }
+    &:disabled {
+        background: var(--color-gray-primary);
+        cursor: not-allowed;
     }
 }
 .linkText {

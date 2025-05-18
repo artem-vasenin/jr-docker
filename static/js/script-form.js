@@ -30,19 +30,21 @@ dropzone.addEventListener('drop', (e) => {
   handleFiles(e.dataTransfer.files);
 });
 
+// Добавляем ссылку на отправленный файл в текстовое поле
 getLinkBtn.addEventListener('click', e => {
     const path = e.target.dataset.path;
     if (path) {
-        linkText.value = path;
+        linkText.value = `http://0.0.0.0:8000/${path}`;
+        checkCopyBtn();
     }
 });
 
+// Копируем ссылку на файл в буфер обмена
 copyLinkBtn.addEventListener('click', e => {
-    console.log(e);
     const path = e.target.dataset.path;
     if (path) {
         if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(path)
+            navigator.clipboard.writeText(`http://0.0.0.0:8000/${path}`)
             .then(() => {
                 onAlert('Path was copied');
             })
@@ -52,7 +54,7 @@ copyLinkBtn.addEventListener('click', e => {
         } else {
             // fallback для старых браузеров или не-HTTPS
             const textarea = document.createElement('textarea');
-            textarea.value = path;
+            textarea.value = `http://0.0.0.0:8000/${path}`;
             textarea.style.position = 'fixed';
             document.body.appendChild(textarea);
             textarea.focus();
@@ -68,6 +70,7 @@ copyLinkBtn.addEventListener('click', e => {
     }
 });
 
+// Функция вывода всплывающих сообщений
 const onAlert = (text, type='success', time=5000) => {
         myAlert.innerText = text;
         myAlert.classList.add('active', type);
@@ -77,6 +80,32 @@ const onAlert = (text, type='success', time=5000) => {
     }, time);
 };
 
+// Проверка доступности кнопки показа ссылки
+const checkLinkBtn = () => {
+    const path = getLinkBtn.dataset.path;
+    if (!path) {
+        getLinkBtn.setAttribute('disabled', 'disabled');
+    } else {
+        getLinkBtn.removeAttribute('disabled');
+    }
+};
+
+// Проверка доступности кнопки копирования ссылки
+const checkCopyBtn = () => {
+    const path = copyLinkBtn.dataset.path;
+    const value = linkText.value;
+    if (!path || !value) {
+        copyLinkBtn.setAttribute('disabled', 'disabled');
+    } else {
+        copyLinkBtn.removeAttribute('disabled');
+    }
+};
+
+// Запускаем проверку доступности кнопок
+checkLinkBtn();
+checkCopyBtn();
+
+// Отправка файлов на сервер
 async function handleFiles(files) {
 const file = files[0];
   if (file) {
@@ -92,6 +121,9 @@ const file = files[0];
                 const resJson = await res.json();
                 getLinkBtn.dataset.path = resJson.path;
                 copyLinkBtn.dataset.path = resJson.path;
+                linkText.value = '';
+                checkLinkBtn();
+                checkCopyBtn();
             } else {
                 onAlert("Upload error", "error", 3000);
             }
