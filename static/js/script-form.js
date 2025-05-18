@@ -92,9 +92,8 @@ const checkLinkBtn = () => {
 
 // Проверка доступности кнопки копирования ссылки
 const checkCopyBtn = () => {
-    const path = copyLinkBtn.dataset.path;
     const value = linkText.value;
-    if (!path || !value) {
+    if (!value) {
         copyLinkBtn.setAttribute('disabled', 'disabled');
     } else {
         copyLinkBtn.removeAttribute('disabled');
