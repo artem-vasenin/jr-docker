@@ -34,7 +34,7 @@ dropzone.addEventListener('drop', (e) => {
 getLinkBtn.addEventListener('click', e => {
     const path = e.target.dataset.path;
     if (path) {
-        linkText.value = `http://0.0.0.0:8000/${path}`;
+        linkText.value = `http://localhost/${path}`;
         checkCopyBtn();
     }
 });
@@ -44,7 +44,7 @@ copyLinkBtn.addEventListener('click', e => {
     const path = e.target.dataset.path;
     if (path) {
         if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(`http://0.0.0.0:8000/${path}`)
+            navigator.clipboard.writeText(`http://localhost/${path}`)
             .then(() => {
                 onAlert('Path was copied');
             })
