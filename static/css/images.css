@@ -38,6 +38,14 @@
     }
 }
 
+.hide {
+    display: none;
+}
+
+.empty {
+    color: red;
+}
+
 .table {
     width: 800px;
 }

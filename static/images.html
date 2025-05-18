@@ -19,7 +19,8 @@
 
     <main class="main">
         <div class="list">
-            <table class="table">
+            <div class="empty hide" id="empty">Files list is empty</div>
+            <table class="table hide" id="table">
                 <thead class="thead">
                     <tr class="tr">
                         <th class="th name">Name</th>
@@ -27,21 +28,7 @@
                         <th class="th delete">Delete</th>
                     </tr>
                 </thead>
-                <tbody class="tbody">
-                    <tr class="tr">
-                        <td class="td name">
-                            <img src="img/img.svg" alt="img">Cat.png
-                        </td>
-                        <td class="td url">
-                            <a href="https://sharefile.xyz/file.jpg" target="_blank" class="link">https://sharefile.xyz/file.jpg</a>
-                        </td>
-                        <td class="td delete">
-                            <button class="deleteBtn" onclick="onDelete('https://sharefile.xyz/file.jpg')">
-                                <img src="img/delete.svg" alt="delete">
-                            </button>
-                        </td>
-                    </tr>
-                </tbody>
+                <tbody class="tbody" id="tbody"></tbody>
             </table>
         </div>
     </main>

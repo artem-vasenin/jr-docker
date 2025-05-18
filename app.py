@@ -1,4 +1,5 @@
 import os
+import json
 import mimetypes
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from requests_toolbelt.multipart import decoder
@@ -9,20 +10,33 @@ HOST = '0.0.0.0'
 PORT = 8000
 UPLOAD_DIR = 'images'
 ALLOWED_EXT = {'jpg', 'jpeg', 'png', 'gif'}
-MAX_FILE_SIZE = 5 * 1024 * 1024
+MAX_FILE_SIZE = 1 * 1024 * 1024
 
 os.makedirs(UPLOAD_DIR, exist_ok=True)
-files = {'/': './static/index.html', '/upload': './static/form.html', '/images': './static/images.html'}
+pages = {'/': './static/index.html', '/upload': './static/form.html', '/images': './static/images.html'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXT
 
 class API(SimpleHTTPRequestHandler):
     def do_GET(self):
-        print(self.path)
         if self.path in ['/', '/upload', '/images']:
             self.send_response(200)
             self.send_header('Content-type', 'text/html')
             self.end_headers()
-            with open(files[self.path], 'rb') as f:
+            with open(pages[self.path], 'rb') as f:
                 self.wfile.write(f.read())
+        elif self.path == '/get-images':
+            try:
+                os.makedirs(UPLOAD_DIR, exist_ok=True)
+                files = [f for f in os.listdir(UPLOAD_DIR) if allowed_file(f)]
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({"list": files}).encode('utf-8'))
+            except Exception as e:
+                self.send_error_response(500, f'Error listing images: {str(e)}')
+                # logging.error(f'Error listing images: {str(e)}')
         elif self.path.startswith('/css/') or self.path.startswith('/js/') or self.path.startswith('/img/'):
             file_path = './static' + self.path
             if os.path.exists(file_path) and os.path.isfile(file_path):
@@ -32,28 +46,25 @@ class API(SimpleHTTPRequestHandler):
                 self.end_headers()
                 with open(file_path, 'rb') as f:
                     self.wfile.write(f.read())
-        elif self.path == '/images':
-            print('GET list')
         else:
             self.send_response(404)
             self.end_headers()
             self.wfile.write(b'404 Not Found')
     def do_POST(self):
-        def send_err(text, status=400):
-            self.send_response(status)
-            self.end_headers()
-            self.wfile.write(text)
-
         if self.path == '/upload':
             content_type = self.headers.get('Content-Type', '')
             content_length = int(self.headers.get('Content-Length', 0))
 
             if not content_type.startswith('multipart/form-data'):
-                send_err(b"Error: Content-Type must be multipart/form-data")
+                self.send_error_response(400, "Error: Content-Type must be multipart/form-data")
                 return
 
             if content_length <= 0:
-                send_err(b"Error: Content-Length must be greater than 0")
+                self.send_error_response(400, "Error: Content-Length must be greater than 0")
+                return
+
+            if content_length >= MAX_FILE_SIZE:
+                self.send_error_response(400, "Error: Content-Length must be less than 5Mb")
                 return
 
             body = self.rfile.read(content_length)
@@ -61,7 +72,7 @@ class API(SimpleHTTPRequestHandler):
             try:
                 multipart_data = decoder.MultipartDecoder(body, content_type)
             except Exception as e:
-                send_err(f"Error parsing multipart data: {str(e)}".encode('utf-8'))
+                self.send_error_response(400, f"Error parsing multipart data: {str(e)}".encode('utf-8'))
                 return
 
             saved = []
@@ -74,8 +85,7 @@ class API(SimpleHTTPRequestHandler):
 
                 # Извлекаем имя файла из Content-Disposition
                 filename = disposition.split('filename="')[1].split('"')[0]
-                ext = filename.rsplit('.', 1)[-1]
-                filename = os.path.basename(f'{int(time.time() * 1000)}.{ext}')
+                filename = os.path.basename(f'{int(time.time() * 1000)}__name__{filename}')
                 filepath = os.path.join(UPLOAD_DIR, filename)
 
                 # Сохраняем файл
@@ -114,7 +124,41 @@ class API(SimpleHTTPRequestHandler):
 
     def do_DELETE(self):
         if self.path == '/images':
-            print('Delete')
+            content_length = int(self.headers.get('Content-Length', 0))
+
+            if content_length <= 0:
+                self.send_error_response(400, "Error: Content-Length must be greater than 0")
+                return
+
+            try:
+                body = self.rfile.read(content_length)
+                print(body.decode('utf-8'))
+                filename = body.decode('utf-8')
+
+                if not filename:
+                    self.send_error_response(400, "Error: Filename is empty")
+                    return
+
+                filepath = os.path.join(UPLOAD_DIR, os.path.basename(filename))
+
+                if os.path.exists(filepath) and os.path.isfile(filepath):
+                    os.remove(filepath)
+                    self.send_response(200)
+                    self.end_headers()
+                    self.wfile.write(b'{"status": "deleted"}')
+                else:
+                    self.send_error_response(400, "Error: File is not found")
+
+            except Exception as e:
+                self.send_response(500)
+                self.end_headers()
+                self.wfile.write(json.dumps({'error': str(e)}).encode())
+
+    def send_error_response(self, code, message):
+        self.send_response(code)
+        self.send_header('Content-type', 'application/json')
+        self.end_headers()
+        self.wfile.write(json.dumps({"error": message}).encode('utf-8'))
 
 if __name__ == '__main__':
     server_address = (HOST, PORT)
