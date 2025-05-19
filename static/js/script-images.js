@@ -1,3 +1,4 @@
+// Вывод всплывашки с сообщениями
 const onAlert = (text, type='success', time=5000) => {
         myAlert.innerText = text;
         myAlert.classList.add('active', type);
@@ -7,6 +8,7 @@ const onAlert = (text, type='success', time=5000) => {
     }, time);
 };
 
+// Получение списка фоток от сервера
 const fetchList = async () => {
     try {
         const res = await fetch('/get-images');
@@ -22,6 +24,7 @@ const fetchList = async () => {
     }
 };
 
+// Генерация списка фотографий
 const renderList = (list) => {
     const tbody = document.getElementById("tbody");
 
@@ -59,6 +62,7 @@ const renderList = (list) => {
     }));
 };
 
+// Обновление списка фотографий
 const onListUpdate = async () => {
     const table = document.getElementById("table");
     const tbody = document.getElementById("tbody");
@@ -75,6 +79,7 @@ const onListUpdate = async () => {
     }
 };
 
+// Удаление элемента из списка
 const onDelete = async (url) => {
     try {
         const res = await fetch('/images', { method: 'DELETE', body: url });

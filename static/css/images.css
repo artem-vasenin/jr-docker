@@ -5,37 +5,8 @@
     color: var(--color-dark-primary);
     justify-content: initial;
 }
-.title {
-    font-weight: 700;
-    font-size: 16px;
-    text-align: center;
-    margin: 0 0 10px;
-    padding-top: 30px;
-}
-.subtitle {
-    font-weight: 400;
-    font-size: 14px;
-    line-height: 150%;
-    text-align: center;
-    margin: 0;
-    padding-bottom: 50px;
-}
-.tabs {
-    text-align: center;
-    padding-bottom: 50px;
-}
-.tab {
-    display: inline-block;
-    padding: 0 9px;
-    font-weight: 700;
-    font-size: 20px;
-    line-height: 100%;
-    text-decoration: none;
-    color: var(--color-blue-secondary);
-
-    &.active, &:hover {
-        color: var(--color-blue-primary);
-    }
+.main {
+    width: 100%;
 }
 
 .hide {
@@ -47,7 +18,12 @@
 }
 
 .table {
-    width: 800px;
+    width: 100%;
+
+    @media screen and (min-width: 800px) {
+        width: 800px;
+        margin: 0 auto;
+    }
 }
 .th, .td {
     text-align: left;
