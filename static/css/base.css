@@ -62,7 +62,8 @@ html {
 .alert {
     position: fixed;
     width: 320px;
-    height: 50px;
+    min-height: 50px;
+    padding: 6px;
     background: var(--color-blue-secondary);
     border-radius: 0 0 10px 10px;
     top: 0;

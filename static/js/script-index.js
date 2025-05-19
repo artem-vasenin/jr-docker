@@ -1,8 +1,10 @@
+// Получаем ссылку на рандомное изображение
 const getUrl = () => {
     const list = ['img/h1.png', 'img/h2.png', 'img/h3.png', 'img/h4.png', 'img/h5.png'];
     return list[Math.floor(Math.random() * list.length)];
 };
 
+// Создаем ноду картинки
 const renderImg = () => {
     const imageBlock = document.getElementById('imageBlock');
     const img = document.createElement("img");

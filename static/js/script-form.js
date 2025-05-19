@@ -46,10 +46,10 @@ copyLinkBtn.addEventListener('click', e => {
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(`http://localhost/${path}`)
             .then(() => {
-                onAlert('Path was copied');
+                onAlert('Ссылка успешно скопирована');
             })
             .catch(err => {
-                onAlert('Copy is failed', 'error');
+                onAlert('Ошибка копирования', 'error');
             });
         } else {
             // fallback для старых браузеров или не-HTTPS
@@ -61,9 +61,9 @@ copyLinkBtn.addEventListener('click', e => {
             textarea.select();
             try {
               document.execCommand('copy');
-              onAlert('Path was copied');
+              onAlert('Ссылка успешно скопирована');
             } catch (err) {
-              onAlert('Copy is failed', 'error');
+              onAlert('Ошибка копирования', 'error');
             }
             document.body.removeChild(textarea);
         }
@@ -116,7 +116,7 @@ const file = files[0];
             const res = await fetch('/upload', { method: 'POST', body: formData });
 
             if (res.ok) {
-                onAlert("Upload success", "success", 3000);
+                onAlert("Изображение успешно загружено", "success", 3000);
                 const resJson = await res.json();
                 getLinkBtn.dataset.path = resJson.path;
                 copyLinkBtn.dataset.path = resJson.path;
@@ -124,14 +124,15 @@ const file = files[0];
                 checkLinkBtn();
                 checkCopyBtn();
             } else {
-                onAlert("Upload error", "error", 3000);
+                const resJson = await res.json();
+                onAlert(resJson.error || "Ошибка загрузки", "error", 3000);
             }
         } catch (err) {
-            onAlert("Server error", "error", 3000);
+            onAlert("Ошибка сервера", "error", 3000);
         }
       } else {
-        onAlert('Upload failed', 'error', 3000);
-        dropzoneTitle.textContent = "Upload failed";
+        onAlert(file.size >= 5 * 1024 * 1024 ? 'Файл больше 5Мбт' : 'Неверный формат файла', 'error', 3000);
+        dropzoneTitle.textContent = file.size >= 5 * 1024 * 1024 ? 'Файл больше 5Мбт' : 'Неверный формат файла';
         dropzoneTitle.style.color = 'red';
         setTimeout(() => {
             dropzoneTitle.textContent = "Select a file or drag and drop here";

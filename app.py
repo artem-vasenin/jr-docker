@@ -19,9 +19,11 @@ pages = {'/': './static/index.html', '/upload': './static/form.html', '/images':
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs(LOGS_DIR, exist_ok=True)
 
+# проверка разрешенного расширения
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXT
 
+# Настройки логгера
 logging.basicConfig(
     level=logging.INFO,
     format='[%(asctime)s] %(message)s',
@@ -32,12 +34,14 @@ logging.basicConfig(
 
 class ApiServer(BaseHTTPRequestHandler):
     def do_GET(self):
+        # отдаем страницу из списка разрешенных роктов
         if self.path in ['/', '/upload', '/images']:
             self.send_response(200)
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             with open(pages[self.path], 'rb') as f:
                 self.wfile.write(f.read())
+        # Получаем список изображений
         elif self.path == '/get-images':
             try:
                 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -48,6 +52,7 @@ class ApiServer(BaseHTTPRequestHandler):
                 self.wfile.write(json.dumps({"list": files}).encode('utf-8'))
             except Exception as e:
                 self.send_error_response(500, f'Ошибка чтения изображений - {str(e)}')
+        # получаем статику - стили, скрипты, картинки для фронта
         elif self.path.startswith('/css/') or self.path.startswith('/js/') or self.path.startswith('/img/'):
             file_path = './static' + self.path
             if os.path.exists(file_path) and os.path.isfile(file_path):
@@ -60,14 +65,17 @@ class ApiServer(BaseHTTPRequestHandler):
         else:
             self.send_error_response(404, '404 Not Found')
     def do_POST(self):
+        # если приходит пост запрос на загрузку файла
         if self.path == '/upload':
             try:
                 content_type = self.headers.get('Content-Type', '')
                 content_length = int(self.headers.get('Content-Length', 0))
                 body = self.rfile.read(content_length)
+
                 saved = []
                 filepath = ''
 
+                # Проверяем верный ли формат данных
                 if not content_type.startswith('multipart/form-data'):
                     raise ValueError("Content-Type must be multipart/form-data")
 
@@ -79,9 +87,11 @@ class ApiServer(BaseHTTPRequestHandler):
                 if len(body) <= 0:
                     raise ValueError("Content-Length должен быть больше 0")
 
+                # Проверяем не превышает ли файл допустимый размер
                 if len(body) >= (MAX_FILE_SIZE * 1024 * 1024):
                     raise ValueError(f"Content-Length должен быть меньше {MAX_FILE_SIZE}Mb")
 
+                # читаем переданные данные в цикле
                 for part in multipart_data.parts:
                     disposition = part.headers.get(b'Content-Disposition', b'').decode('utf-8')
                     if 'filename' not in disposition:
@@ -91,6 +101,7 @@ class ApiServer(BaseHTTPRequestHandler):
                     filename = os.path.basename(f'{int(time.time() * 1000)}__name__{filename}')
                     filepath = os.path.join(UPLOAD_DIR, filename)
 
+                    # Пробуем сохранить файл
                     try:
                         with open(filepath, 'wb') as f:
                             f.write(part.content)
@@ -98,6 +109,7 @@ class ApiServer(BaseHTTPRequestHandler):
                         self.send_error_response(500, f"Ошибка сохранения файла ({filename}) - {str(e)}")
                         continue
 
+                    # Делаем проверки после сохранения
                     try:
                         with Image.open(filepath) as img:
                             img.load()
@@ -121,6 +133,7 @@ class ApiServer(BaseHTTPRequestHandler):
             except Exception as e:
                 self.send_error_response(500, f'Error saving file: {str(e)}')
     def do_DELETE(self):
+        # Удаление файла по его имени
         if self.path == '/images':
             content_length = int(self.headers.get('Content-Length', 0))
             try:
@@ -130,6 +143,7 @@ class ApiServer(BaseHTTPRequestHandler):
                 body = self.rfile.read(content_length)
                 filename = body.decode('utf-8')
 
+                # Проверяем передвнные данные на пустоту
                 if not filename:
                     raise ValueError('Пустое имя файла')
 
