@@ -6,6 +6,16 @@ const myAlert = document.getElementById('myAlert');
 const linkText = document.getElementById('linkText');
 const copyLinkBtn = document.getElementById('copyLinkBtn');
 
+// Функция вывода всплывающих сообщений
+const onAlert = (text, type='success', time=3000) => {
+        myAlert.innerText = text;
+        myAlert.classList.add('active', type);
+    setTimeout(() => {
+        myAlert.innerText = '';
+        myAlert.classList.remove('active', type);
+    }, time);
+};
+
 // При клике на drop-зону открываем диалог выбора файла
 dropzone.addEventListener('click', () => fileInput.click());
 
@@ -70,16 +80,6 @@ copyLinkBtn.addEventListener('click', e => {
     }
 });
 
-// Функция вывода всплывающих сообщений
-const onAlert = (text, type='success', time=5000) => {
-        myAlert.innerText = text;
-        myAlert.classList.add('active', type);
-    setTimeout(() => {
-        myAlert.innerText = '';
-        myAlert.classList.remove('active', type);
-    }, time);
-};
-
 // Проверка доступности кнопки показа ссылки
 const checkLinkBtn = () => {
     const path = getLinkBtn.dataset.path;
@@ -108,7 +108,8 @@ checkCopyBtn();
 async function handleFiles(files) {
 const file = files[0];
   if (file) {
-      if (file.size < 5 * 1024 * 1024 && ['image/jpeg', 'image/png', 'image/gif'].includes(file.type)) {
+      const MAX_SIZE = 5;
+      if (file.size < MAX_SIZE * 1024 * 1024 && ['image/jpeg', 'image/png', 'image/gif'].includes(file.type)) {
         const formData = new FormData();
         formData.append('file', file);
 
@@ -116,7 +117,7 @@ const file = files[0];
             const res = await fetch('/upload', { method: 'POST', body: formData });
 
             if (res.ok) {
-                onAlert("Изображение успешно загружено", "success", 3000);
+                onAlert("Изображение успешно загружено", "success");
                 const resJson = await res.json();
                 getLinkBtn.dataset.path = resJson.path;
                 copyLinkBtn.dataset.path = resJson.path;
@@ -125,14 +126,14 @@ const file = files[0];
                 checkCopyBtn();
             } else {
                 const resJson = await res.json();
-                onAlert(resJson.error || "Ошибка загрузки", "error", 3000);
+                onAlert(resJson.error || "Ошибка загрузки", "error");
             }
         } catch (err) {
-            onAlert("Ошибка сервера", "error", 3000);
+            onAlert("Ошибка сервера", "error");
         }
       } else {
-        onAlert(file.size >= 5 * 1024 * 1024 ? 'Файл больше 5Мбт' : 'Неверный формат файла', 'error', 3000);
-        dropzoneTitle.textContent = file.size >= 5 * 1024 * 1024 ? 'Файл больше 5Мбт' : 'Неверный формат файла';
+        onAlert(file.size >= MAX_SIZE * 1024 * 1024 ? `Файл больше ${MAX_SIZE}Мбт` : 'Неверный формат файла', 'error', 3000);
+        dropzoneTitle.textContent = file.size >= MAX_SIZE * 1024 * 1024 ? `Файл больше ${MAX_SIZE}Мбт` : 'Неверный формат файла';
         dropzoneTitle.style.color = 'red';
         setTimeout(() => {
             dropzoneTitle.textContent = "Select a file or drag and drop here";

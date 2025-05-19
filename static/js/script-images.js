@@ -1,5 +1,5 @@
 // Вывод всплывашки с сообщениями
-const onAlert = (text, type='success', time=5000) => {
+const onAlert = (text, type='success', time=3000) => {
         myAlert.innerText = text;
         myAlert.classList.add('active', type);
     setTimeout(() => {
@@ -17,10 +17,11 @@ const fetchList = async () => {
             const resJson = await res.json();
             return resJson.list;
         } else {
-            onAlert("Upload error", "error", 3000);
+            const resJson = await res.json();
+            onAlert(resJson.error || "Ошибка загрузки", "error");
         }
     } catch (err) {
-        onAlert("Server error", "error", 3000);
+        onAlert("Ошибка сервера", "error");
     }
 };
 
@@ -86,12 +87,12 @@ const onDelete = async (url) => {
 
         if (res.ok) {
             await onListUpdate();
-            onAlert("File was deleted", "success", 3000);
+            onAlert("Файл успешно удален", "success");
         } else {
-            onAlert("Delete is incomplete", "error", 3000);
+            onAlert("Ошибка удаления файла", "error");
         }
     } catch (err) {
-        onAlert("Server error", "error", 3000);
+        onAlert("Ошибка сервера", "error");
     }
 };
 
