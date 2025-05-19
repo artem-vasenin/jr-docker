@@ -13,7 +13,7 @@ PORT = 8000
 UPLOAD_DIR = 'images'
 LOGS_DIR = 'logs'
 ALLOWED_EXT = {'jpg', 'jpeg', 'png', 'gif'}
-MAX_FILE_SIZE = 1
+MAX_FILE_SIZE = 5
 pages = {'/': './static/index.html', '/upload': './static/form.html', '/images': './static/images.html'}
 
 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -24,7 +24,8 @@ def allowed_file(filename):
 
 logging.basicConfig(
     level=logging.INFO,
-    format='[%(asctime)s] %(levelname)s: %(message)s',
+    format='[%(asctime)s] %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S',
     filename=f'{LOGS_DIR}/server.log',
     filemode='a'
 )
@@ -46,7 +47,7 @@ class ApiServer(BaseHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(json.dumps({"list": files}).encode('utf-8'))
             except Exception as e:
-                self.send_error_response(500, f'Listing images: {str(e)}')
+                self.send_error_response(500, f'Ошибка чтения изображений - {str(e)}')
         elif self.path.startswith('/css/') or self.path.startswith('/js/') or self.path.startswith('/img/'):
             file_path = './static' + self.path
             if os.path.exists(file_path) and os.path.isfile(file_path):
@@ -73,13 +74,13 @@ class ApiServer(BaseHTTPRequestHandler):
                 try:
                     multipart_data = decoder.MultipartDecoder(body, content_type)
                 except Exception as e:
-                    raise ValueError(f"Parsing multipart data: {str(e)}")
+                    raise ValueError(f"Parsing multipart data - {str(e)}")
 
                 if len(body) <= 0:
-                    raise ValueError("Content-Length must be greater than 0")
+                    raise ValueError("Content-Length должен быть больше 0")
 
                 if len(body) >= (MAX_FILE_SIZE * 1024 * 1024):
-                    raise ValueError(f"Content-Length must be less than {MAX_FILE_SIZE}Mb")
+                    raise ValueError(f"Content-Length должен быть меньше {MAX_FILE_SIZE}Mb")
 
                 for part in multipart_data.parts:
                     disposition = part.headers.get(b'Content-Disposition', b'').decode('utf-8')
@@ -94,7 +95,7 @@ class ApiServer(BaseHTTPRequestHandler):
                         with open(filepath, 'wb') as f:
                             f.write(part.content)
                     except Exception as e:
-                        self.send_error_response(500, f"{filename}: failed to save file ({str(e)})")
+                        self.send_error_response(500, f"Ошибка сохранения файла ({filename}) - {str(e)}")
                         continue
 
                     try:
@@ -103,11 +104,11 @@ class ApiServer(BaseHTTPRequestHandler):
                             format = img.format
                             size = img.size
                         if format.lower() not in ALLOWED_EXT:
-                            raise ValueError(f'Unexpected format: {format}')
+                            raise ValueError(f'Запрещенный формат ({format})')
                         saved.append(f"{filename} (format: {format}, size: {size})")
                     except Exception as e:
                         os.remove(filepath)
-                        self.send_error_response(500, f"{filename}: not a valid image")
+                        self.send_error_response(500, f"Не валидный файл ({filename}) - {str(e)}")
                         continue
 
                 if saved:
@@ -115,6 +116,8 @@ class ApiServer(BaseHTTPRequestHandler):
                     self.send_header('Content-Type', 'application/json')
                     self.end_headers()
                     self.wfile.write(json.dumps({"path": filepath}).encode('utf-8'))
+                    logging.info(f'Успех: Файл ({filepath}) успешно сохранен')
+                    print(f'Успех: Файл ({filepath}) успешно сохранен')
             except Exception as e:
                 self.send_error_response(500, f'Error saving file: {str(e)}')
     def do_DELETE(self):
@@ -122,13 +125,13 @@ class ApiServer(BaseHTTPRequestHandler):
             content_length = int(self.headers.get('Content-Length', 0))
             try:
                 if content_length <= 0:
-                    raise ValueError('Content-Length must be greater than 0')
+                    raise ValueError('Content-Length должен быть больше 0')
 
                 body = self.rfile.read(content_length)
                 filename = body.decode('utf-8')
 
                 if not filename:
-                    raise ValueError('Filename is empty')
+                    raise ValueError('Пустое имя файла')
 
                 filepath = os.path.join(UPLOAD_DIR, os.path.basename(filename))
 
@@ -138,12 +141,15 @@ class ApiServer(BaseHTTPRequestHandler):
                     self.send_header('Content-Type', 'application/json')
                     self.end_headers()
                     self.wfile.write(json.dumps({"deleted": filepath}).encode('utf-8'))
+                    logging.info(f'Успех: Файл ({filepath}) успешно удален')
+                    print(f'Успех: Файл ({filepath}) успешно удален')
                 else:
                     raise ValueError('File is not found')
             except Exception as e:
                 self.send_error_response(500, str(e))
     def send_error_response(self, code, message):
-        print(f'[ERROR] {code}: {message}')
+        print(f'Ошибка: {message}')
+        logging.error(f'Ошибка: {message}')
         self.send_response(code)
         self.send_header('Content-Type', 'application/json')
         self.end_headers()
