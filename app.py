@@ -18,7 +18,7 @@ pages = {'/': './static/index.html', '/upload': './static/form.html', '/images':
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXT
 
-class API(SimpleHTTPRequestHandler):
+class APIServer(SimpleHTTPRequestHandler):
     def do_GET(self):
         if self.path in ['/', '/upload', '/images']:
             self.send_response(200)
@@ -162,6 +162,6 @@ class API(SimpleHTTPRequestHandler):
 
 if __name__ == '__main__':
     server_address = (HOST, PORT)
-    httpd = HTTPServer(server_address, API)
+    httpd = HTTPServer(server_address, APIServer)
     print(f"Server started on http://{HOST}:{PORT}")
     httpd.serve_forever()
