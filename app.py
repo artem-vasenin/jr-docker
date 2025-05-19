@@ -28,7 +28,7 @@ logging.basicConfig(
     level=logging.INFO,
     format='[%(asctime)s] %(message)s',
     datefmt='%Y-%m-%d %H:%M:%S',
-    filename=f'{LOGS_DIR}/server.log',
+    filename=f'{LOGS_DIR}/app.log',
     filemode='a'
 )
 
@@ -45,7 +45,7 @@ class ApiServer(BaseHTTPRequestHandler):
         elif self.path == '/get-images':
             try:
                 os.makedirs(UPLOAD_DIR, exist_ok=True)
-                files = [f for f in os.listdir(UPLOAD_DIR) if allowed_file(f)]
+                files = [f'{UPLOAD_DIR}/{f}' for f in os.listdir(UPLOAD_DIR) if allowed_file(f)]
                 self.send_response(200)
                 self.send_header('Content-Type', 'application/json')
                 self.end_headers()
