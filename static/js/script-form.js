@@ -108,7 +108,7 @@ checkCopyBtn();
 async function handleFiles(files) {
 const file = files[0];
   if (file) {
-      if (file.size < 5 * 1024 * 1024 && ['image/jpeg', 'image/png', 'image/gif'].includes(file.type)) {
+      // if (file.size < 5 * 1024 * 1024 && ['image/jpeg', 'image/png', 'image/gif'].includes(file.type)) {
         const formData = new FormData();
         formData.append('file', file);
 
@@ -129,14 +129,14 @@ const file = files[0];
         } catch (err) {
             onAlert("Server error", "error", 3000);
         }
-      } else {
-        onAlert('Upload failed', 'error', 3000);
-        dropzoneTitle.textContent = "Upload failed";
-        dropzoneTitle.style.color = 'red';
-        setTimeout(() => {
-            dropzoneTitle.textContent = "Select a file or drag and drop here";
-            dropzoneTitle.style.color = '#0B0B0B';
-        }, 3000);
-      }
+      // } else {
+      //   onAlert('Upload failed', 'error', 3000);
+      //   dropzoneTitle.textContent = "Upload failed";
+      //   dropzoneTitle.style.color = 'red';
+      //   setTimeout(() => {
+      //       dropzoneTitle.textContent = "Select a file or drag and drop here";
+      //       dropzoneTitle.style.color = '#0B0B0B';
+      //   }, 3000);
+      // }
   }
 }
