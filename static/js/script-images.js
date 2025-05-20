@@ -41,7 +41,7 @@ const renderList = (list) => {
         tr.appendChild(tdName);
         tbody.appendChild(tr);
         const link = document.createElement("a");
-        link.href = `http://localhost:8080/${i}`;
+        link.href = `http://localhost/${i}`;
         link.target = '_blank';
         link.classList.add('link');
         link.textContent = i;

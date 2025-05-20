@@ -44,7 +44,7 @@ dropzone.addEventListener('drop', (e) => {
 getLinkBtn.addEventListener('click', e => {
     const path = e.target.dataset.path;
     if (path) {
-        linkText.value = `http://localhost:8080/${path}`;
+        linkText.value = `http://localhost/${path}`;
         checkCopyBtn();
     }
 });
@@ -54,7 +54,7 @@ copyLinkBtn.addEventListener('click', e => {
     const path = e.target.dataset.path;
     if (path) {
         if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(`http://localhost:8080/${path}`)
+            navigator.clipboard.writeText(`http://localhost/${path}`)
             .then(() => {
                 onAlert('Ссылка успешно скопирована');
             })
@@ -64,7 +64,7 @@ copyLinkBtn.addEventListener('click', e => {
         } else {
             // fallback для старых браузеров или не-HTTPS
             const textarea = document.createElement('textarea');
-            textarea.value = `http://localhost:8080/${path}`;
+            textarea.value = `http://localhost/${path}`;
             textarea.style.position = 'fixed';
             document.body.appendChild(textarea);
             textarea.focus();
