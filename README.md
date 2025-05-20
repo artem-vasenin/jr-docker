@@ -9,7 +9,7 @@
 `docker compose down`
 
 Проект доступен по адресу:  
-[http://localhost:8080](http://localhost:8080)
+[http://localhost](http://localhost)
 
 ---
 
