@@ -6,7 +6,7 @@ import mimetypes
 
 from PIL import Image
 from requests_toolbelt.multipart import decoder
-from http.server import BaseHTTPRequestHandler, HTTPServer
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 HOST = '0.0.0.0'
 PORT = 8000
@@ -171,6 +171,6 @@ class ApiServer(BaseHTTPRequestHandler):
 
 if __name__ == '__main__':
     server_address = (HOST, PORT)
-    httpd = HTTPServer(server_address, ApiServer)
+    httpd = ThreadingHTTPServer(server_address, ApiServer)
     print(f"Server started on http://{HOST}:{PORT}")
     httpd.serve_forever()
