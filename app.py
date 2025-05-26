@@ -34,7 +34,7 @@ logging.basicConfig(
 
 class ApiServer(BaseHTTPRequestHandler):
     def do_GET(self):
-        # отдаем страницу из списка разрешенных роктов
+        # отдаем страницу из списка разрешенных роутов
         if self.path in ['/', '/upload', '/images']:
             self.send_response(200)
             self.send_header('Content-type', 'text/html')
