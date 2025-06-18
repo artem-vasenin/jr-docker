@@ -8,12 +8,20 @@ from PIL import Image
 from requests_toolbelt.multipart import decoder
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
-HOST = '0.0.0.0'
-PORT = 8000
-UPLOAD_DIR = 'images'
-LOGS_DIR = 'logs'
+postgres_config = {
+    "dbname": os.getenv("DB_NAME"),
+    "user": os.getenv("DB_USER"),
+    "password": os.getenv("DB_PASSWORD"),
+    "host": os.getenv("DB_HOST"),
+    "port": os.getenv("DB_PORT")
+}
+
+HOST = os.getenv("APP_HOST")
+PORT = int(os.getenv("APP_PORT"))
+UPLOAD_DIR = os.getenv("UPLOAD_DIR")
+LOGS_DIR = os.getenv("LOGS_DIR")
+MAX_FILE_SIZE = int(os.getenv("MAX_FILE_SIZE"))
 ALLOWED_EXT = {'jpg', 'jpeg', 'png', 'gif'}
-MAX_FILE_SIZE = 5
 pages = {'/': './static/index.html', '/upload': './static/form.html', '/images': './static/images.html'}
 
 os.makedirs(UPLOAD_DIR, exist_ok=True)
