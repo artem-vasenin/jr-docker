@@ -7,22 +7,23 @@ import mimetypes
 from PIL import Image
 from requests_toolbelt.multipart import decoder
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from db import DBManager
 
 postgres_config = {
-    "dbname": os.getenv("DB_NAME"),
-    "user": os.getenv("DB_USER"),
-    "password": os.getenv("DB_PASSWORD"),
-    "host": os.getenv("DB_HOST"),
-    "port": os.getenv("DB_PORT")
+    "dbname": os.getenv("DB_NAME") or 'images',
+    "user": os.getenv("DB_USER") or 'postgres',
+    "password": os.getenv("DB_PASSWORD") or 'root',
+    "host": os.getenv("DB_HOST") or 'localhost',
+    "port": os.getenv("DB_PORT") or '5432',
 }
 
-HOST = os.getenv("APP_HOST")
-PORT = int(os.getenv("APP_PORT"))
-UPLOAD_DIR = os.getenv("UPLOAD_DIR")
-LOGS_DIR = os.getenv("LOGS_DIR")
-MAX_FILE_SIZE = int(os.getenv("MAX_FILE_SIZE"))
+HOST = os.getenv("APP_HOST") or 'localhost'
+PORT = int(os.getenv("APP_PORT")) if os.getenv("APP_PORT") else 8000
+UPLOAD_DIR = os.getenv("UPLOAD_DIR") or 'images'
+LOGS_DIR = os.getenv("LOGS_DIR") or 'logs'
+MAX_FILE_SIZE = int(os.getenv("MAX_FILE_SIZE")) if os.getenv("MAX_FILE_SIZE") else 5
 ALLOWED_EXT = {'jpg', 'jpeg', 'png', 'gif'}
-pages = {'/': './static/index.html', '/upload': './static/form.html', '/images': './static/images.html'}
+pages = {'/': './static/index.html', '/upload': './static/form.html', '/list-images': './static/images.html'}
 
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs(LOGS_DIR, exist_ok=True)
@@ -43,7 +44,7 @@ logging.basicConfig(
 class ApiServer(BaseHTTPRequestHandler):
     def do_GET(self):
         # отдаем страницу из списка разрешенных роутов
-        if self.path in ['/', '/upload', '/images']:
+        if self.path in ['/', '/upload', '/list-images']:
             self.send_response(200)
             self.send_header('Content-type', 'text/html')
             self.end_headers()
@@ -51,15 +52,25 @@ class ApiServer(BaseHTTPRequestHandler):
                 self.wfile.write(f.read())
         # Получаем список изображений
         elif self.path == '/get-images':
-            try:
-                os.makedirs(UPLOAD_DIR, exist_ok=True)
-                files = [f'{UPLOAD_DIR}/{f}' for f in os.listdir(UPLOAD_DIR) if allowed_file(f)]
-                self.send_response(200)
-                self.send_header('Content-Type', 'application/json')
-                self.end_headers()
-                self.wfile.write(json.dumps({"list": files}).encode('utf-8'))
-            except Exception as e:
-                self.send_error_response(500, f'Ошибка чтения изображений - {str(e)}')
+            with DBManager(postgres_config) as pg:
+                img_list = [{
+                    'id': f[0],
+                    'filename': f[1],
+                    'original_name': f[2],
+                    'size': f[3],
+                    'upload_time': f[4].strftime('%Y-%m-%d %H:%M:%S'),
+                    'file_type': f[5]
+                } for f in pg.get_list()]
+            if len(img_list) == 0:
+                self.send_error_response(404, '404 Not Found')
+            else:
+                try:
+                    self.send_response(200)
+                    self.send_header('Content-Type', 'application/json')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({"list": img_list}).encode('utf-8'))
+                except Exception as e:
+                    self.send_error_response(500, f'Ошибка чтения изображений - {str(e)}')
         # получаем статику - стили, скрипты, картинки для фронта
         elif self.path.startswith('/css/') or self.path.startswith('/js/') or self.path.startswith('/img/'):
             file_path = './static' + self.path
@@ -105,9 +116,17 @@ class ApiServer(BaseHTTPRequestHandler):
                     if 'filename' not in disposition:
                         continue
 
-                    filename = disposition.split('filename="')[1].split('"')[0]
-                    filename = os.path.basename(f'{int(time.time() * 1000)}__name__{filename}')
-                    filepath = os.path.join(UPLOAD_DIR, filename)
+                    filename = str(int(time.time() * 1000))
+                    original_name = disposition.split('filename="')[1].split('"')[0]
+                    filetype = original_name.rsplit('.', 1)[1].lower()
+                    file = {
+                        'original_name': original_name,
+                        'filename': filename,
+                        'size': len(body),
+                        'file_type': filetype,
+                    }
+
+                    filepath = os.path.join(UPLOAD_DIR, f'{filename}.{filetype}')
 
                     # Пробуем сохранить файл
                     try:
@@ -126,6 +145,8 @@ class ApiServer(BaseHTTPRequestHandler):
                         if format.lower() not in ALLOWED_EXT:
                             raise ValueError(f'Запрещенный формат ({format})')
                         saved.append(f"{filename} (format: {format}, size: {size})")
+                        with DBManager(postgres_config) as pg:
+                            pg.add_file(file)
                     except Exception as e:
                         os.remove(filepath)
                         self.send_error_response(500, f"Не валидный файл ({filename}) - {str(e)}")
@@ -178,6 +199,9 @@ class ApiServer(BaseHTTPRequestHandler):
         self.wfile.write(json.dumps({"error": message}).encode('utf-8'))
 
 if __name__ == '__main__':
+    with DBManager(postgres_config) as pg:
+        pg.create_table()
+
     server_address = (HOST, PORT)
     httpd = ThreadingHTTPServer(server_address, ApiServer)
     print(f"Server started on http://{HOST}:{PORT}")

@@ -30,21 +30,20 @@ const renderList = (list) => {
     const tbody = document.getElementById("tbody");
 
     list.forEach((i => {
-        const fileName = i.split('__name__')[1];
         const tr = document.createElement("tr");
         const img = document.createElement("img");
         img.src = 'img/img.svg';
         img.alt = 'img';
         const tdName = document.createElement("td");
         tdName.classList.add('td', 'name');
-        tdName.append(img, fileName);
+        tdName.append(img, i.original_name);
         tr.appendChild(tdName);
         tbody.appendChild(tr);
         const link = document.createElement("a");
-        link.href = `http://localhost/${i}`;
+        link.href = `http://localhost/${i.filename}.${i.file_type}`;
         link.target = '_blank';
         link.classList.add('link');
-        link.textContent = i;
+        link.textContent = i.original_name;
         const tdLink = document.createElement("td");
         tdLink.classList.add('td', 'url');
         tdLink.appendChild(link);
@@ -54,7 +53,7 @@ const renderList = (list) => {
         icon.alt = 'delete';
         const button = document.createElement("button");
         button.classList.add('deleteBtn');
-        button.addEventListener("click", () => onDelete(i));
+        button.addEventListener("click", () => onDelete(i.id));
         button.appendChild(icon);
         const tdDelete = document.createElement("td");
         tdDelete.classList.add('td', 'delete');

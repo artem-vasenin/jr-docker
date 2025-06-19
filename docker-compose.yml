@@ -4,11 +4,11 @@ services:
     container_name: db
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_NAME: ${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_NAME=${DB_NAME}
     ports:
-      - "5435:5432"
+      - "${DB_PORT}:5432"
     volumes:
       - pg_data:/var/lib/postgresql/data
 
@@ -18,16 +18,16 @@ services:
       dockerfile: Dockerfile
     container_name: app
     environment:
-      DB_USER: ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-      DB_NAME: ${DB_NAME}
-      DB_HOST: ${DB_HOST}
-      DB_PORT: ${DB_PORT}
-      APP_HOST: ${APP_HOST}
-      APP_PORT: ${APP_PORT}
-      UPLOAD_DIR: ${UPLOAD_DIR}
-      LOGS_DIR: ${LOGS_DIR}
-      MAX_FILE_SIZE: ${MAX_FILE_SIZE}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - APP_HOST=${APP_HOST}
+      - APP_PORT=${APP_PORT}
+      - UPLOAD_DIR=${UPLOAD_DIR}
+      - LOGS_DIR=${LOGS_DIR}
+      - MAX_FILE_SIZE=${MAX_FILE_SIZE}
     volumes:
       - ./images:/app/images
       - ./logs:/app/logs
