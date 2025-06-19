@@ -170,10 +170,10 @@ class ApiServer(BaseHTTPRequestHandler):
                     raise ValueError('Content-Length должен быть больше 0')
 
                 body = self.rfile.read(content_length)
-                filename = body.decode('utf-8')
+                file_id = body.decode('utf-8')
 
                 # Проверяем передвнные данные на пустоту
-                if not filename:
+                if not file_id or not file_id.isdigit():
                     raise ValueError('Пустое имя файла')
 
                 filepath = os.path.join(UPLOAD_DIR, os.path.basename(filename))

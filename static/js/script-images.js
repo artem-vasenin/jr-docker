@@ -80,9 +80,9 @@ const onListUpdate = async () => {
 };
 
 // Удаление элемента из списка
-const onDelete = async (url) => {
+const onDelete = async (id) => {
     try {
-        const res = await fetch('/images', { method: 'DELETE', body: url });
+        const res = await fetch('/images', { method: 'DELETE', body: id });
 
         if (res.ok) {
             await onListUpdate();
