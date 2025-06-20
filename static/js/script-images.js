@@ -124,12 +124,14 @@ const onListUpdate = async () => {
     }
 };
 
+// Листалка назад по постраничной навигации
 const onPrev = async () => {
     if (pageNum === 1) return;
     pageNum--;
     await onListUpdate();
 }
 
+// Листалка вперед по постраничной навигации
 const onNext = async() => {
     if (pageNum === pagesCnt) return;
     pageNum++;
