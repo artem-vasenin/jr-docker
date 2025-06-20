@@ -52,7 +52,7 @@ class ApiServer(BaseHTTPRequestHandler):
                 self.wfile.write(f.read())
         # Получаем список изображений
         elif self.path == '/get-images':
-            with DBManager(postgres_config) as pg:
+            with DBManager(postgres_config) as db:
                 img_list = [{
                     'id': f[0],
                     'filename': f[1],
@@ -60,7 +60,7 @@ class ApiServer(BaseHTTPRequestHandler):
                     'size': f[3],
                     'upload_time': f[4].strftime('%Y-%m-%d %H:%M:%S'),
                     'file_type': f[5]
-                } for f in pg.get_list()]
+                } for f in db.get_list()]
             if len(img_list) == 0:
                 self.send_error_response(404, '404 Not Found')
             else:
@@ -145,8 +145,8 @@ class ApiServer(BaseHTTPRequestHandler):
                         if format.lower() not in ALLOWED_EXT:
                             raise ValueError(f'Запрещенный формат ({format})')
                         saved.append(f"{filename} (format: {format}, size: {size})")
-                        with DBManager(postgres_config) as pg:
-                            pg.add_file(file)
+                        with DBManager(postgres_config) as db:
+                            db.add_file(file)
                     except Exception as e:
                         os.remove(filepath)
                         self.send_error_response(500, f"Не валидный файл ({filename}) - {str(e)}")
@@ -172,14 +172,23 @@ class ApiServer(BaseHTTPRequestHandler):
                 body = self.rfile.read(content_length)
                 file_id = body.decode('utf-8')
 
-                # Проверяем передвнные данные на пустоту
+                # Проверяем переданные данные на пустоту
                 if not file_id or not file_id.isdigit():
-                    raise ValueError('Пустое имя файла')
+                    raise ValueError('Пустое ID файла')
 
-                filepath = os.path.join(UPLOAD_DIR, os.path.basename(filename))
+                with DBManager(postgres_config) as db:
+                    item = db.get_by_id(int(file_id))
+
+                # Проверяем переданные данные на соответствие в бд
+                if not item:
+                    raise ValueError('Файл с таким ID отсутствует')
+
+                filepath = os.path.join(UPLOAD_DIR, os.path.basename(f'{item[1]}.{item[5]}'))
 
                 if os.path.exists(filepath) and os.path.isfile(filepath):
                     os.remove(filepath)
+                    with DBManager(postgres_config) as db:
+                        db.delete_by_id(int(file_id))
                     self.send_response(200)
                     self.send_header('Content-Type', 'application/json')
                     self.end_headers()
