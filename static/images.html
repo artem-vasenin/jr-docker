@@ -23,13 +23,22 @@
             <table class="table hide" id="table">
                 <thead class="thead">
                     <tr class="tr">
-                        <th class="th name">Name</th>
-                        <th class="th url">URL</th>
-                        <th class="th delete">Delete</th>
+                        <th class="th url">Ссылка</th>
+                        <th class="th name">Имя</th>
+                        <th class="th size">Размер</th>
+                        <th class="th date">Дата</th>
+                        <th class="th type">Тип</th>
+                        <th class="th delete">Удалить</th>
                     </tr>
                 </thead>
                 <tbody class="tbody" id="tbody"></tbody>
             </table>
+        </div>
+
+        <div class="pagination">
+            <button class="pgBtn pgBtn--prev" id="prevBtn" onclick="onPrev()"><</button>
+            <span class="page" id="page">1 из 10</span>
+            <button class="pgBtn pgBtn--next" id="nextBtn" onclick="onNext()">></button>
         </div>
     </main>
 

@@ -50,6 +50,11 @@
         text-decoration: underline;
     }
 }
+.th.delete, .td.delete {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 .td.delete .deleteBtn {
     width: 30px;
     height: 30px;
@@ -61,5 +66,28 @@
     align-items: center;
     &:hover {
        border-color: var(--color-red-primary);
+    }
+}
+
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    padding: 20px 0;
+}
+.pgBtn {
+    border: none;
+    background: var(--color-blue-primary);
+    color: var(--color-light-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 4px;
+    &.disabled {
+        background: var(--color-gray-secondary);
+        cursor: not-allowed;
     }
 }

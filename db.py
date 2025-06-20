@@ -53,9 +53,17 @@ class DBManager:
         except Exception as e:
             print(e)
 
-    def get_list(self):
-        self.cur.execute("SELECT * FROM images;")
-        return self.cur.fetchall()
+    def get_list(self, page):
+        query = "SELECT * FROM images;"
+        if page and int(page):
+            offset = (int(page) - 1) * 10
+            query = f"SELECT * FROM images LIMIT 10 OFFSET {offset};"
+        self.cur.execute(query)
+        rows = self.cur.fetchall()
+        self.cur.execute('SELECT COUNT(*) FROM images')
+        total = self.cur.fetchone()[0]
+
+        return rows, total
 
     def get_by_id(self, file_id):
         self.cur.execute(f"SELECT * FROM images WHERE id = {file_id};")

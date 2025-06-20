@@ -5,6 +5,7 @@ import logging
 import mimetypes
 
 from PIL import Image
+from urllib.parse import urlparse, parse_qs
 from requests_toolbelt.multipart import decoder
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from db import DBManager
@@ -43,16 +44,22 @@ logging.basicConfig(
 
 class ApiServer(BaseHTTPRequestHandler):
     def do_GET(self):
+        parsed_url = urlparse(self.path)
+        path = parsed_url.path
+        query = parse_qs(parsed_url.query)
+
         # отдаем страницу из списка разрешенных роутов
-        if self.path in ['/', '/upload', '/list-images']:
+        if path in ['/', '/upload', '/list-images']:
             self.send_response(200)
             self.send_header('Content-type', 'text/html')
             self.end_headers()
             with open(pages[self.path], 'rb') as f:
                 self.wfile.write(f.read())
         # Получаем список изображений
-        elif self.path == '/get-images':
+        elif path == '/get-images':
+            page = query['page'][0] if query['page'][0].isdigit() else None
             with DBManager(postgres_config) as db:
+                rows, total = db.get_list(page)
                 img_list = [{
                     'id': f[0],
                     'filename': f[1],
@@ -60,13 +67,13 @@ class ApiServer(BaseHTTPRequestHandler):
                     'size': f[3],
                     'upload_time': f[4].strftime('%Y-%m-%d %H:%M:%S'),
                     'file_type': f[5]
-                } for f in db.get_list()]
+                } for f in rows]
 
             try:
                 self.send_response(200)
                 self.send_header('Content-Type', 'application/json')
                 self.end_headers()
-                self.wfile.write(json.dumps({"list": img_list}).encode('utf-8'))
+                self.wfile.write(json.dumps({"list": img_list, "total": total}).encode('utf-8'))
             except Exception as e:
                 self.send_error_response(500, f'Ошибка чтения изображений - {str(e)}')
         # получаем статику - стили, скрипты, картинки для фронта
