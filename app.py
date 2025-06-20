@@ -61,16 +61,14 @@ class ApiServer(BaseHTTPRequestHandler):
                     'upload_time': f[4].strftime('%Y-%m-%d %H:%M:%S'),
                     'file_type': f[5]
                 } for f in db.get_list()]
-            if len(img_list) == 0:
-                self.send_error_response(404, '404 Not Found')
-            else:
-                try:
-                    self.send_response(200)
-                    self.send_header('Content-Type', 'application/json')
-                    self.end_headers()
-                    self.wfile.write(json.dumps({"list": img_list}).encode('utf-8'))
-                except Exception as e:
-                    self.send_error_response(500, f'Ошибка чтения изображений - {str(e)}')
+
+            try:
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({"list": img_list}).encode('utf-8'))
+            except Exception as e:
+                self.send_error_response(500, f'Ошибка чтения изображений - {str(e)}')
         # получаем статику - стили, скрипты, картинки для фронта
         elif self.path.startswith('/css/') or self.path.startswith('/js/') or self.path.startswith('/img/'):
             file_path = './static' + self.path
