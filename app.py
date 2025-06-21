@@ -219,5 +219,5 @@ if __name__ == '__main__':
 
     server_address = (HOST, PORT)
     httpd = ThreadingHTTPServer(server_address, ApiServer)
-    print(f"Server started on http://{HOST}:{PORT}")
+    print("Server started on http://localhost")
     httpd.serve_forever()
