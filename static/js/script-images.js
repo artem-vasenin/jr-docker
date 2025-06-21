@@ -68,7 +68,7 @@ const renderList = (list) => {
         tbody.appendChild(tr);
         // td Ссылка
         const link = document.createElement("a");
-        link.href = `http://localhost/${i.filename}.${i.file_type}`;
+        link.href = `http://localhost/images/${i.filename}.${i.file_type}`;
         link.target = '_blank';
         link.classList.add('link');
         link.textContent = `${i.filename}.${i.file_type}`;

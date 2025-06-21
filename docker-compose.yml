@@ -4,33 +4,35 @@ services:
     container_name: db
     restart: unless-stopped
     environment:
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_NAME=${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     ports:
-      - "${DB_PORT}:5432"
+      - "5435:5432"
     volumes:
       - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      retries: 5
 
   app:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: app
-    environment:
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_NAME=${DB_NAME}
-      - DB_HOST=${DB_HOST}
-      - DB_PORT=${DB_PORT}
-      - APP_HOST=${APP_HOST}
-      - APP_PORT=${APP_PORT}
-      - UPLOAD_DIR=${UPLOAD_DIR}
-      - LOGS_DIR=${LOGS_DIR}
-      - MAX_FILE_SIZE=${MAX_FILE_SIZE}
     volumes:
       - ./images:/app/images
       - ./logs:/app/logs
+      - ./backups:/app/backups
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+      UPLOAD_DIR: ${UPLOAD_DIR}
+      LOGS_DIR: ${LOGS_DIR}
+      BACKUPS_DIR: ${BACKUPS_DIR}
+      MAX_FILE_SIZE: ${MAX_FILE_SIZE}
     expose:
       - 8000
     healthcheck:
@@ -38,6 +40,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 3
+    depends_on:
+      - db
 
   nginx:
     image: nginx:alpine

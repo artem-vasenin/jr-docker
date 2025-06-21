@@ -11,18 +11,19 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from db import DBManager
 
 postgres_config = {
-    "dbname": os.getenv("DB_NAME") or 'images',
-    "user": os.getenv("DB_USER") or 'postgres',
-    "password": os.getenv("DB_PASSWORD") or 'root',
-    "host": os.getenv("DB_HOST") or 'localhost',
-    "port": os.getenv("DB_PORT") or '5432',
+    "dbname": os.getenv("POSTGRES_DB"),
+    "user": os.getenv("POSTGRES_USER"),
+    "password": os.getenv("POSTGRES_PASSWORD"),
+    "host": 'db',
+    "port": '5432',
 }
 
-HOST = os.getenv("APP_HOST") or 'localhost'
-PORT = int(os.getenv("APP_PORT")) if os.getenv("APP_PORT") else 8000
-UPLOAD_DIR = os.getenv("UPLOAD_DIR") or 'images'
-LOGS_DIR = os.getenv("LOGS_DIR") or 'logs'
-MAX_FILE_SIZE = int(os.getenv("MAX_FILE_SIZE")) if os.getenv("MAX_FILE_SIZE") else 5
+HOST = '0.0.0.0'
+PORT = 8000
+UPLOAD_DIR = os.getenv("UPLOAD_DIR")
+LOGS_DIR = os.getenv("LOGS_DIR")
+BACKUPS_DIR = os.getenv("BACKUPS_DIR")
+MAX_FILE_SIZE = int(os.getenv("MAX_FILE_SIZE"))
 ALLOWED_EXT = {'jpg', 'jpeg', 'png', 'gif'}
 pages = {'/': './static/index.html', '/upload': './static/form.html', '/list-images': './static/images.html'}
 
