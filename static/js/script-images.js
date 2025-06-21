@@ -1,6 +1,7 @@
 let pageNum = 1;
 let pagesCnt = 0;
 let itemsCnt = 0;
+let total = 0;
 
 // Вывод всплывашки с сообщениями
 const onAlert = (text, type='success', time=3000) => {
@@ -14,6 +15,7 @@ const onAlert = (text, type='success', time=3000) => {
 
 // Обновление пагинации
 const updatePagination = () => {
+    const pagination = document.getElementById("pagination");
     const pageField = document.getElementById("page");
     const prevBtn = document.getElementById("prevBtn");
     const nextBtn = document.getElementById("nextBtn");
@@ -26,6 +28,12 @@ const updatePagination = () => {
     if (pageNum === 1) {
         prevBtn.classList.add('disabled');
     }
+
+    if (total <= 10) {
+        pagination.classList.add('hide')
+    } else {
+        pagination.classList.remove('hide')
+    }
 };
 
 // Получение списка фоток от сервера
@@ -36,7 +44,7 @@ const fetchList = async () => {
         if (res.ok) {
             const resJson = await res.json();
             const list = resJson.list;
-            const total = resJson.total;
+            total = resJson.total;
             pagesCnt = !total || total < 10 ? 1 : total % 10 ? ~~(total / 10) + 1 : ~~(total / 10);
             itemsCnt = list.length;
             updatePagination();
