@@ -8,6 +8,7 @@ from PIL import Image
 from urllib.parse import urlparse, parse_qs
 from requests_toolbelt.multipart import decoder
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from psycopg2 import OperationalError
 from db import DBManager
 
 postgres_config = {
@@ -59,16 +60,19 @@ class ApiServer(BaseHTTPRequestHandler):
         # Получаем список изображений
         elif path == '/get-images':
             page = query['page'][0] if query['page'][0].isdigit() else None
-            with DBManager(postgres_config) as db:
-                rows, total = db.get_list(page)
-                img_list = [{
-                    'id': f[0],
-                    'filename': f[1],
-                    'original_name': f[2],
-                    'size': f[3],
-                    'upload_time': f[4].strftime('%Y-%m-%d %H:%M:%S'),
-                    'file_type': f[5]
-                } for f in rows]
+            try:
+                with DBManager(postgres_config) as db:
+                    rows, total = db.get_list(page)
+                    img_list = [{
+                        'id': f[0],
+                        'filename': f[1],
+                        'original_name': f[2],
+                        'size': f[3],
+                        'upload_time': f[4].strftime('%Y-%m-%d %H:%M:%S'),
+                        'file_type': f[5]
+                    } for f in rows]
+            except OperationalError as e:
+                raise RuntimeError(f'Не удалось подключиться к базе данных: {e}')
 
             try:
                 self.send_response(200)

@@ -57,7 +57,7 @@ class DBManager:
         query = "SELECT * FROM images;"
         if page and int(page):
             offset = (int(page) - 1) * 10
-            query = f"SELECT * FROM images LIMIT 10 OFFSET {offset};"
+            query = f"SELECT * FROM images ORDER BY id DESC LIMIT 10 OFFSET {offset};"
         self.cur.execute(query)
         rows = self.cur.fetchall()
         self.cur.execute('SELECT COUNT(*) FROM images')
