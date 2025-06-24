@@ -47,3 +47,13 @@ project/
 
 На первой странице кнопка назад отключается, как и кнопка вперед на последней странице.
 
+## Резервное копирование и восстановление базы данных
+
+Резервное копирование
+
+`docker exec -t db pg_dump -U postgres images > ./backups/dump_$(date +%F_%H%M%S).sql`
+
+Восстановление базы
+
+`docker exec -i db psql -U postgres -d images < ./backups/dump_2025-06-24_222350.sql`
+
