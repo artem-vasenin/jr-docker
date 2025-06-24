@@ -71,9 +71,6 @@ ALTER TABLE ONLY public.images ALTER COLUMN id SET DEFAULT nextval('public.image
 --
 
 COPY public.images (id, filename, original_name, size, upload_time, file_type) FROM stdin;
-3	1750792398643	Маланья.png	266648	2025-06-24 19:13:18.698652	png
-4	1750792404248	королевна.jpg	93935	2025-06-24 19:13:24.261922	jpg
-5	1750792409685	ноябрьсе.jpg	713178	2025-06-24 19:13:29.705116	jpg
 \.
 
 

@@ -55,5 +55,5 @@ project/
 
 Восстановление базы
 
-`docker exec -i db psql -U postgres -d images < ./backups/dump_2025-06-24_222350.sql`
+`docker exec -i db psql -U postgres -d images < ./backups/dump_2025-06-24_223143.sql`
 
